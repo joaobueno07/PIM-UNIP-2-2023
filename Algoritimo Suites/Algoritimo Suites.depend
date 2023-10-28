@@ -1,0 +1,9 @@
+# depslib dependency file v1.0
+1698530755 source:c:\users\muril\onedrive\documentos\pim pc-desk\pim-unip-2-2023\algoritimo suites\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<locale.h>
+	<time.h>
+	<conio.h>
+
