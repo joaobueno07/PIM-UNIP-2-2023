@@ -3,7 +3,7 @@
 #include <string.h>
 #include <locale.h>
 #include <time.h>
-#include <conio.h>
+
 
 int i, filial, CARGO, diaEntrada, mesEntrada, anoEntrada, diaSaida, mesSaida, anoSaida, diaDoAnoSaida, diaDoAnoEntrada, numeroQuarto,TipodeUsuario, multa, acessoglobal=0, ReservasConcluidas=0, opc1;
 char NOME[50], CPF[12], SENHA[15];
