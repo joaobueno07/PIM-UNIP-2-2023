@@ -7,7 +7,7 @@
 
 int i, filial, CARGO, diaEntrada, mesEntrada, anoEntrada, diaSaida, mesSaida, anoSaida, diaDoAnoSaida, diaDoAnoEntrada, numeroQuarto,TipodeUsuario, multa, acessoglobal=0, ReservasConcluidas=0, opc1;
 char NOME[50], CPF[12], SENHA[15];
-float precoS1=650.00, precoC1=850.00, precoM1=1150.00, precoP1=1750.00;
+float precoS1=650.00, precoC1=850.00, precoM1=1150.00, precoP1=1750.00, encarecer=0.30;
 float precoS2=450.00, precoC2=550.00, precoM2=750.00;
 typedef struct
 {
@@ -17,13 +17,13 @@ typedef struct
 
 typedef struct
 {
-    int numeroQuarto, diaDoAnoEntrada,diaDoAnoSaida, AnoEntrada, AnoSaida, CodRes, pg, fillial; //pg quando 0 significa nao pg, quando 1 siginifica pg
+    int numeroQuarto, diaDoAnoEntrada,diaDoAnoSaida, AnoEntrada, AnoSaida, CodRes, pg, fillial;
     char nomeR[50], cpfR[12],  USUARIO[50];
     float precoreserva;
 } ReservaA;
 typedef struct
 {
-    int numeroQuarto, diaDoAnoEntrada,diaDoAnoSaida, AnoEntrada, AnoSaida, fillial; //pg quando 0 significa nao pg, quando 1 siginifica pg
+    int numeroQuarto, diaDoAnoEntrada,diaDoAnoSaida, AnoEntrada, AnoSaida, fillial;
     float precoreserva;
 } Pago;
 
@@ -51,7 +51,7 @@ void definirCorConsole();
 int CompararDataAtual (int Dia, int Mes, int Ano);
 int ValidarDatas(int dia, int mes, int ano);
 int dataParaDiaDoAno(int dia, int mes, int ano);
-int VerificarSobreposicao(ReservaA reserva[], int *nReservas, int numeroQuarto, int diaDoAnoEntrada, int diaDoAnoSaida);
+int VerificarSobreposicao(ReservaA reserva[], int *nReservas, int numeroQuarto, int diaDoAnoEntrada, int diaDoAnoSaida, int anoEntrada, int anoSaida);
 void mensagemMenuFun();
 void descricaoQrt();
 
@@ -548,7 +548,7 @@ void mensagemMenuFun()
     printf("\n6|Escolha 6 para ver clientes..........................|");
     printf("\n7|Escolha 7 para ver relatorio de faturamento..........|");
     printf("\n8|Escolha 8 para realizar pagamento....................|");
-    printf("\n9|Escolha 9 para alterar preço de estadia.............|\n");
+    printf("\n9|Escolha 9 para alterar preço de estadia..............|\n");
     printf("\n10|Escolha 10 para alterar tema do sistema.............|");
     printf("\n\n13|Escolha 13 voltar.................................|\n\n");
 }
@@ -774,27 +774,39 @@ int dataParaDiaDoAno(int dia, int mes, int ano)
 
     return diaDoAno;
 }
-int VerificarSobreposicao(ReservaA reserva[], int *nReservas, int numeroQuarto, int diaDoAnoEntrada, int diaDoAnoSaida)
+int VerificarSobreposicao(ReservaA reserva[], int *nReservas, int numeroQuarto, int diaDoAnoEntrada, int diaDoAnoSaida, int anoEntrada, int anoSaida)
 {
     for (int i = 0; i < *nReservas; i++)
     {
-        if (reserva[i].numeroQuarto == numeroQuarto && reserva[i].fillial == filial)
+
+        if ((reserva[i].numeroQuarto == numeroQuarto && reserva[i].fillial == filial)&&
+                (anoEntrada==reserva[i].AnoEntrada && anoSaida==reserva[i].AnoSaida)&&
+                (diaDoAnoSaida >= reserva[i].diaDoAnoEntrada&& anoEntrada==reserva[i].AnoEntrada)&&
+                (diaDoAnoEntrada <= reserva[i].diaDoAnoSaida&& anoSaida==reserva[i].AnoSaida))
         {
-
-            if (diaDoAnoSaida >= reserva[i].diaDoAnoEntrada)
-            {
-
-                if (diaDoAnoEntrada <= reserva[i].diaDoAnoSaida)
-                {
-                    return 1;
-                }
-            }
+            return 1;
         }
+        else
+        {
+            return 0;
+        }
+        if ((reserva[i].numeroQuarto == numeroQuarto && reserva[i].fillial == filial)&&
+            (anoEntrada==reserva[i].AnoEntrada && anoSaida==reserva[i].AnoSaida)&&
+            (diaDoAnoSaida >= reserva[i].diaDoAnoEntrada&& anoEntrada==reserva[i].AnoEntrada)&&
+            (diaDoAnoEntrada <= reserva[i].diaDoAnoSaida&& anoSaida==reserva[i].AnoSaida)&&
+            (reserva[i].AnoEntrada!=reserva[i].AnoSaida)&& ((diaDoAnoSaida >= reserva[i].diaDoAnoEntrada || diaDoAnoEntrada <= reserva[i].diaDoAnoSaida) ||
+                        (diaDoAnoSaida <= 366 && diaDoAnoEntrada >= 1))&&
+            ((diaDoAnoSaida >= reserva[i].diaDoAnoEntrada || diaDoAnoEntrada <= reserva[i].diaDoAnoSaida) ||
+                        (diaDoAnoSaida <= 366 && diaDoAnoEntrada >= 1)))
+            {
+                        return 1;
+            }
+            else{
+                    return 0;
+            }
+
     }
-    return 0;
-}
-int VerificarSobreposicaoVirada(ReservaA reserva[], int *nReservas, int numeroQuarto, int diaDoAnoEntrada, int diaDoAnoSaida)
-{
+
     for (int i = 0; i < *nReservas; i++)
     {
         if (reserva[i].numeroQuarto == numeroQuarto && reserva[i].fillial == filial)
@@ -804,21 +816,24 @@ int VerificarSobreposicaoVirada(ReservaA reserva[], int *nReservas, int numeroQu
             {
                 if (diaDoAnoSaida >= reserva[i].diaDoAnoEntrada && diaDoAnoEntrada <= reserva[i].diaDoAnoSaida)
                 {
-                    return 1; // Sobreposição encontrada
+                    return 1; // Sobreposição encontrada caso 1, caso 0 sem sobreposicao
                 }
             }
             else if (reserva[i].AnoEntrada==anoEntrada)
             {
                 if ((diaDoAnoSaida >= reserva[i].diaDoAnoEntrada || diaDoAnoEntrada <= reserva[i].diaDoAnoSaida) ||
-                    (diaDoAnoSaida <= 366 && diaDoAnoEntrada >= 1))
+                        (diaDoAnoSaida <= 366 && diaDoAnoEntrada >= 1))
                 {
-                    return 1; // Sobreposição encontrada
+                    return 1;
                 }
+
             }
         }
+
     }
-    return 0; // Sem sobreposição
+    return 0;
 }
+
 
 int PrecificarQuartoF1(int nnQuarto, float preco)
 {
@@ -843,7 +858,7 @@ int PrecificarQuartoF1(int nnQuarto, float preco)
 void Alteradordepreco()
 {
     int Estadia;
-    float novopreco;
+    float novopreco, novoencarecimento;
     do
     {
         printf("\nQual Estadia, voce deseja alterar o preço?\n");
@@ -852,7 +867,8 @@ void Alteradordepreco()
         printf("[3]Master\n");
         if(filial==1)
             printf("[4]Presidencial\n");
-        printf("[5] Voltar\n");
+        printf("[5] Encarecimento de temporada\n");
+        printf("[6] Voltar\n");
         scanf("%d", &Estadia);
         switch(Estadia)
         {
@@ -915,12 +931,18 @@ void Alteradordepreco()
                 printf("\nOpção Invalida!\n");
             break;
         case 5:
+            printf("\nPor favor inisira a porcentagem de encarecimento:\n");
+            scanf("%f", &novoencarecimento);
+           novoencarecimento=novoencarecimento/100;
+            encarecer=novoencarecimento;
+            break;
+             case 6:
             break;
         default:
             printf("\nOpção Invalida!\n");
         }
     }
-    while(Estadia!=5);
+    while(Estadia!=6);
     return;
 }
 
@@ -967,11 +989,15 @@ void FazerReservasFuncionario(ReservaA reserva[], cadastroCliente cadastroCli[],
             {
                 gapDia=(float)(diaDoAnoSaida-diaDoAnoEntrada);
                 precoR*= gapDia;
+                    if(diaDoAnoEntrada>335)
+                    precoR*=encarecer;
             }
             if(diaDoAnoEntrada == diaDoAnoSaida)
             {
                 gapDia=(float)(diaDoAnoSaida+1-diaDoAnoEntrada);
                 precoR*= gapDia;
+                if(diaDoAnoEntrada>335)
+                    precoR*=encarecer;
             }
         }
 
@@ -1069,11 +1095,15 @@ void FazerReservasCliente(ReservaA reserva[], cadastroCliente cadastroCli[],  in
             {
                 gapDia=(float)(diaDoAnoSaida-diaDoAnoEntrada);
                 precoR*= gapDia;
+                if(diaDoAnoEntrada>335)
+                    precoR*=encarecer;
             }
             if(diaDoAnoEntrada == diaDoAnoSaida)
             {
                 gapDia=(float)(diaDoAnoSaida+1-diaDoAnoEntrada);
                 precoR*= gapDia;
+                if(diaDoAnoEntrada>335)
+                    precoR*=encarecer;
             }
         }
 
@@ -1580,34 +1610,107 @@ void LeitorFaturamento(ReservaA reserva[],Pago reserc[], int *nReservas, int *nR
 
 void definirCorConsole()
 {
+    char Paleta[10], textoC[3],planoDeFundoC[3];
     int planoDeFundo, texto;
 
-    char cores[16][20] =
-    {
-        "Preto", "Azul Escuro", "Verde Escuro", "Ciano Escuro", "Vermelho Escuro", "Magenta Escuro", "Amarelo Escuro", "Cinza Claro",
-        "Cinza Escuro", "Azul Claro", "Verde Claro", "Ciano Claro", "Vermelho Claro", "Magenta Claro", "Amarelo Claro", "Branco"
-    };
+    printf("Cores disponiveis!\n");
+    printf("0-Preto!\n");
+    printf("1-Azul!\n");
+    printf("2-Verde!\n");
+    printf("3-Verde-Agua!\n");
+    printf("4-Vermelho!\n");
+    printf("5-Roxo!\n");
+    printf("6-Amarelo!\n");
+    printf("7-Branco!\n");
+    printf("8-Cinza!\n");
+    printf("9-Azul Claro!\n");
+    printf("10-Verde Claro!\n");
+    printf("11-Verde-agua Claro!\n");
+    printf("12-Vermelho Claro!\n");
+    printf("13-Rosa!\n");
+    printf("14-Amarelo Claro!\n");
+    printf("15-Branco Brilhante!\n");
 
-
-    printf("Tradução de Cores:\n");
-    for (int i = 0; i < 16; i++)
-    {
-        printf("%d - %s\n", i, cores[i]);
-    }
 
     printf("\nEscolha a cor do plano de fundo (0-15): ");
     scanf("%d", &planoDeFundo);
+    fflush(stdin);
+    if(planoDeFundo==0)
+        strcpy(planoDeFundoC,"0");
+    if(planoDeFundo==1)
+        strcpy(planoDeFundoC,"1");
+    if(planoDeFundo==2)
+        strcpy(planoDeFundoC,"2");
+    if(planoDeFundo==3)
+        strcpy(planoDeFundoC,"3");
+    if(planoDeFundo==4)
+        strcpy(planoDeFundoC,"4");
+    if(planoDeFundo==5)
+        strcpy(planoDeFundoC,"5");
+    if(planoDeFundo==6)
+        strcpy(planoDeFundoC,"6");
+    if(planoDeFundo==7)
+        strcpy(planoDeFundoC,"7");
+    if(planoDeFundo==8)
+        strcpy(planoDeFundoC,"8");
+    if(planoDeFundo==9)
+        strcpy(planoDeFundoC,"9");
+    if(planoDeFundo==10)
+        strcpy(planoDeFundoC,"A");
+    if(planoDeFundo==11)
+        strcpy(planoDeFundoC,"B");
+    if(planoDeFundo==12)
+        strcpy(planoDeFundoC,"C");
+    if(planoDeFundo==13)
+        strcpy(planoDeFundoC,"D");
+    if(planoDeFundo==14)
+        strcpy(planoDeFundoC,"E");
+    if(planoDeFundo==15)
+        strcpy(planoDeFundoC,"F");
+
+
+
 
     printf("Escolha a cor do texto (0-15): ");
     scanf("%d", &texto);
+    fflush(stdin);
+    if(texto==0)
+        strcpy(textoC,"0");
+    if(texto==1)
+        strcpy(textoC,"1");
+    if(texto==2)
+        strcpy(textoC,"2");
+    if(texto==3)
+        strcpy(textoC,"3");
+    if(texto==4)
+        strcpy(textoC,"4");
+    if(texto==5)
+        strcpy(textoC,"5");
+    if(texto==6)
+        strcpy(textoC,"6");
+    if(texto==7)
+        strcpy(textoC,"7");
+    if(texto==8)
+        strcpy(textoC,"8");
+    if(texto==9)
+        strcpy(textoC,"9");
+    if(texto==10)
+        strcpy(textoC,"A");
+    if(texto==11)
+        strcpy(textoC,"B");
+    if(texto==12)
+        strcpy(textoC,"C");
+    if(texto==13)
+        strcpy(textoC,"D");
+    if(texto==14)
+        strcpy(textoC,"E");
+    if(texto==15)
+        strcpy(textoC,"F");
 
     if (planoDeFundo >= 0 && planoDeFundo <= 15 && texto >= 0 && texto <= 15)
     {
-
-        char comando[20];
-        snprintf(comando, sizeof(comando), "color %X%X", planoDeFundo, texto);
-        system(comando);
-        printf("Cores definidas: Plano de Fundo - %s, Texto - %s\n", cores[planoDeFundo], cores[texto]);
+        sprintf(Paleta, "color %s%s", textoC, planoDeFundoC);
+        system(Paleta);
     }
     else
     {
@@ -1707,13 +1810,13 @@ int recebedordecheckin(ReservaA reserva[], int*nReservas)
             scanf("%d/%d/%d", &diaEntrada, &mesEntrada, &anoEntrada);
             fflush(stdin);
             valin = ValidarDatas( diaEntrada,  mesEntrada,  anoEntrada) ;
-            compin = CompararDataAtual ( diaEntrada,  mesEntrada, anoEntrada);  //compara data com a atual
-            if (valin == 0) //valida datas (invalida)
+            compin = CompararDataAtual ( diaEntrada,  mesEntrada, anoEntrada);
+            if (valin == 0)
             {
                 printf("\n\t|xxxxx|-Data de Check-in Inválida-|xxxxx|\n");
                 printf("\nPor Favor Insira Novamente:\n");
             }
-            if (compin == -1) //compara data com a atual(invalida)
+            if (compin == -1)
             {
                 printf("\n\t|xxxxx|-Data de Check-in já passou-|xxxxx|\n");
                 printf("\nPor Favor Insira Novamente:\n");
@@ -1727,12 +1830,12 @@ int recebedordecheckin(ReservaA reserva[], int*nReservas)
             fflush(stdin);
             valout = ValidarDatas(diaSaida, mesSaida, anoSaida);
             compout =  CompararDataAtual ( diaSaida,  mesSaida, anoSaida);
-            if (valout == 0) //valida datas (invalida)
+            if (valout == 0)
             {
                 printf("\n\t|xxxxx|-Data de Check-out Inválida-|xxxxx|\n");
                 printf("\nPor Favor Insira Novamente:\n");
             }
-            if (compout == 1) //compara data com a atual
+            if (compout == 1)
             {
                 printf("\n\t|xxxxx|-Data de Check-out já passou-|xxxxx|\n");
                 printf("\nPor Favor Insira Novamente:\n");
@@ -1748,12 +1851,9 @@ int recebedordecheckin(ReservaA reserva[], int*nReservas)
             }
 
         }
-        while (valout != 1 || compout !=0 || VerOut != 1); //valida datas e quebra looping (ir para proxima etapa)
-        if(anoEntrada==anoSaida)
-        VerSob = VerificarSobreposicao(reserva, nReservas, numeroQuarto, diaDoAnoEntrada, diaDoAnoSaida);
-        else{
-        VerSob = VerificarSobreposicaoVirada(reserva, nReservas, numeroQuarto, diaDoAnoEntrada, diaDoAnoSaida);
-        }
+        while (valout != 1 || compout !=0 || VerOut != 1);
+        VerSob = VerificarSobreposicao(reserva, nReservas, numeroQuarto, diaDoAnoEntrada, diaDoAnoSaida, anoEntrada, anoSaida);
+
         if (VerSob == 1)
         {
             printf("\n\t|xxxxx|-Conflito de datas com outra reserva-|xxxxx|\n");
@@ -1821,7 +1921,7 @@ int formaPagamento(int nClientes, cadastroCliente client[], ReservaA reserva[])
         printf("\n________________________________________________________________________________________________________\n");
         printf("\t\t\t\t\tPagamento em Boleto.");
         printf("\n========================================================================================================\n");
-        boleto(nClientes, client, reserva);//pagamento contabila automanticamente
+        boleto(nClientes, client, reserva);
         break;
     case 4:
         printf("\n________________________________________________________________________________________________________\n");
